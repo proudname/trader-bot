@@ -1,8 +1,4 @@
-import { User } from '../user/entity/user.entity';
-
-export type AuthModuleOptions = {
-  jwtKey: string
-}
+import {User} from '../user/entity/user.entity';
 
 export type AuthUserData = Omit<User, 'password'>
 

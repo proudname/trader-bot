@@ -1,41 +1,29 @@
-import { Entity, Column, JoinColumn, ManyToOne, OneToMany, RelationId } from "typeorm";
+import {Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToMany, UpdateDateColumn} from "typeorm";
 import BaseEntity from '@shared/base.entity';
-import {PortfolioItem} from "../../portfolio/entity/portfolio-item.entity";
-import {DBRelation} from "../../../types";
 import {TradingStrategyRule} from "./trading-strategy-rule.entity";
+import {StrategyStatus} from "../enums";
+import {DBRelation} from "../../../types";
+import {Selection} from '../../selection/entities/selection.entity';
 
 @Entity()
 export class TradingStrategy extends BaseEntity {
-  @Column({ unique: true })
-  name: string;
+    @Column({unique: true})
+    name: string;
 
-  @Column({type: 'number'})
-  maxAmount: number;
+    @ManyToMany(() => Selection)
+    @JoinColumn()
+    items: DBRelation<Selection[]>;
 
-  @Column({type: 'decimal', precision: 10, scale: 2})
-  targetPrice: number;
+    @OneToMany(() => TradingStrategyRule, rule => rule.strategy)
+    @JoinColumn()
+    rules: DBRelation<TradingStrategyRule[]>;
 
-  @ManyToOne(() => PortfolioItem)
-  portfolioItem?: DBRelation<PortfolioItem>;
+    @Column({type: 'varchar', enum: StrategyStatus, default: StrategyStatus.ENABLED})
+    status: StrategyStatus;
 
-  @OneToMany(() => TradingStrategyRule, keyPoint => keyPoint.strategy)
-  @JoinColumn()
-  rules: TradingStrategyRule[];
+    @CreateDateColumn()
+    createdAt: Date;
 
-  @Column({ default: false })
-  isActive: boolean;
-
-  @Column({ default: () => 'CURRENT_TIMESTAMP', type: 'timestamp' })
-  cratedAt: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  startedAt?: Date;
-
-  static async findForObserve() {
-    return this.createQueryBuilder('s')
-        .leftJoinAndSelect('s.ticker', 't')
-        .leftJoinAndSelect('s.keyPoints', 'keyPoints')
-        .where('s.isActive = TRUE')
-        .getMany();
-  }
+    @UpdateDateColumn()
+    updatedAt: Date;
 }

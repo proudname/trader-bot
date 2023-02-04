@@ -6,6 +6,7 @@ export type Env = {
     TIN_SANDBOX_KEY: string
     TIN_KEY: string;
     POLYGON_KEY: string;
+    JWT_KEY: string;
     DB_CONNECTION: DataSourceOptions['type'];
     DB_HOST: string;
     DB_USERNAME: string;

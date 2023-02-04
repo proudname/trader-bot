@@ -1,37 +1,34 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { LocalStrategy } from './strategies/local.strategy';
-import { PassportModule } from '@nestjs/passport';
-import { AuthModuleOptions } from './types';
-import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { UserModule } from '../user/user.module';
+import {Global, Module} from '@nestjs/common';
+import {AuthService} from './auth.service';
+import {AuthController} from './auth.controller';
+import {LocalStrategy} from './strategies/local.strategy';
+import {PassportModule} from '@nestjs/passport';
+import {JwtModule} from '@nestjs/jwt';
+import {JwtStrategy} from './strategies/jwt.strategy';
+import {UserModule} from '../user/user.module';
+import {ConfigService} from "@nestjs/config";
+import {Env} from "../../types";
 
-@Module({})
-export class AuthModule {
-  static register(options: AuthModuleOptions): DynamicModule {
-    return {
-      imports: [
+@Global()
+@Module({
+    imports: [
         UserModule,
         PassportModule,
-        JwtModule.register({
-          secret: options.jwtKey,
-          signOptions: { expiresIn: '3h' },
+        JwtModule.registerAsync({
+            useFactory: (configService: ConfigService<Env>) => ({
+                secret: configService.getOrThrow('JWT_KEY'),
+                signOptions: {expiresIn: '3h'},
+            }),
+            inject: [ConfigService]
         })
-      ],
-      providers: [
+    ],
+    providers: [
         AuthService,
         LocalStrategy,
         JwtStrategy,
-        {
-          provide: 'MODULE_OPTIONS',
-          useValue: options
-        }
-      ],
-      controllers: [AuthController],
-      module: AuthModule,
-      exports: [LocalStrategy, JwtStrategy, PassportModule, JwtModule]
-    }
-  }
+    ],
+    controllers: [AuthController],
+    exports: [UserModule]
+})
+export class AuthModule {
 }

@@ -1,20 +1,23 @@
-import {Column, ManyToOne} from "typeorm";
-import {TradingStrategy} from "../../strategy/entities/trading-strategy.entity";
-import {TradeAction, TradingRuleActionType} from "@shared/enums";
+import {Column, Entity, ManyToOne} from "typeorm";
+import {TradeAction} from "@shared/enums";
+import {TradingStrategyRule} from "../../strategy/entities/trading-strategy-rule.entity";
+import {SelectionItem} from "../../selection/entities/selection-item.entity";
+import BaseEntity from "@shared/base.entity";
 
-export class History {
-    @ManyToOne(() => TradingStrategy)
-    strategy: TradingStrategy;
+@Entity()
+export class History extends BaseEntity {
+    @ManyToOne(() => TradingStrategyRule)
+    rule: TradingStrategyRule;
 
-    @Column({ type: "decimal" })
+    @ManyToOne(() => SelectionItem)
+    item: SelectionItem;
+
+    @Column({type: "decimal"})
     price: number;
 
-    @Column({ enum: TradeAction })
+    @Column({type: 'varchar', enum: TradeAction})
     actionType: TradeAction;
 
-    @Column({ enum: TradingRuleActionType })
-    ruleType: TradingRuleActionType;
-
-    @Column({ default: () => 'CURRENT_TIMESTAMP', type: 'timestamp' })
+    @Column({default: () => 'CURRENT_TIMESTAMP', type: 'timestamp'})
     actionDate: Date;
 }

@@ -1,25 +1,20 @@
 export enum DecideEnum {
-  BUY,
-  SELL,
-  DO_NOTHING
+    BUY,
+    SELL,
+    DO_NOTHING
 }
 
 export enum TradingRuleStatus {
-  ACTIVE,
-  EXECUTED
-}
-
-export enum TradingRuleActionType {
-  STOP_LOSS,
-  TAKE_PROFIT
+    ACTIVE,
+    EXECUTED
 }
 
 export enum TradeAction {
-  BUY,
-  SELL
+    BUY,
+    SELL
 }
 
 export enum BrokerType {
-  Tinkoff,
-  Binance
+    Tinkoff,
+    Binance
 }
