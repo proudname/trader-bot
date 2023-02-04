@@ -1,6 +1,6 @@
 import {Column, ManyToOne} from "typeorm";
 import {TradingStrategy} from "../../strategy/entities/trading-strategy.entity";
-import {TradeAction, TradingRuleActionType} from "../../../common/enums";
+import {TradeAction, TradingRuleActionType} from "@shared/enums";
 
 export class History {
     @ManyToOne(() => TradingStrategy)

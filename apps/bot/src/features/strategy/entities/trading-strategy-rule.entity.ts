@@ -1,8 +1,8 @@
 import {Column, Entity, JoinColumn, ManyToOne, OneToOne} from 'typeorm';
 import {TradingStrategy} from './trading-strategy.entity';
-import BaseEntity from '../../../common/base.entity';
+import BaseEntity from '@shared/base.entity';
 import {DBRelation, EntityId} from "../../../types";
-import {TradingRuleActionType, TradingRuleStatus} from "../../../common/enums";
+import {TradingRuleActionType, TradingRuleStatus} from "@shared/enums";
 
 type FindTickerRulesWithCertainTypeParams = {
   tickerId: EntityId,

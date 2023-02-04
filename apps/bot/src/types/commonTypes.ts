@@ -1,7 +1,6 @@
-import {DecideEnum, TradeAction, TradingRuleActionType, TradingRuleStatus} from '../common/enums';
+import {DecideEnum, TradeAction, TradingRuleActionType, TradingRuleStatus} from '@shared/enums';
 import { TradingStrategyRule } from '../features/strategy/entities/trading-strategy-rule.entity';
 import {TradingStrategy} from "../features/strategy/entities/trading-strategy.entity";
-
 
 export interface IBaseEntity {
   id: number
@@ -57,7 +56,6 @@ export type PolygonTicker = {
   "url": "https://api.polygon.io/v2/reference/tickers/AAPL"
 }
 
-
 export type PolygonTickersResponse = {
   "page": number,
   "perPage": number,
@@ -106,7 +104,6 @@ export interface ICreateStrategyDto {
   isActive?: boolean;
   rules: ICreateStrategyKeyPoint[]
 }
-
 
 export type PolygonQuery = {
   page: number,

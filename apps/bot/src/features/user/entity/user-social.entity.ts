@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne } from 'typeorm';
 import { User } from './user.entity';
 import { SocialProvider } from '../enums';
-import BaseEntity from '../../../common/base.entity';
+import BaseEntity from '@shared/base.entity';
 
 @Entity()
 export class UserSocial extends BaseEntity {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import polygonClient from '../clients/polygon.client';
-import BaseApi from '../../../../../apps/bot/src/common/base.api';
+import BaseApi from 'shared/shared/base.api';
 import { PolygonTickersResponse } from '../../../../../apps/bot/src/types';
 import {ErrorGenerator} from "../error-generator";
 

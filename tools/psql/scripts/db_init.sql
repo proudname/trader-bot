@@ -1,0 +1,1 @@
+CREATE DATABASE "trader_dev";

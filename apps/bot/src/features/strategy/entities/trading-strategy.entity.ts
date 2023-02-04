@@ -1,5 +1,5 @@
 import { Entity, Column, JoinColumn, ManyToOne, OneToMany, RelationId } from "typeorm";
-import BaseEntity from '../../../common/base.entity';
+import BaseEntity from '@shared/base.entity';
 import {PortfolioItem} from "../../portfolio/entity/portfolio-item.entity";
 import {DBRelation} from "../../../types";
 import {TradingStrategyRule} from "./trading-strategy-rule.entity";

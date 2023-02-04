@@ -6,7 +6,7 @@ import {LocalStrategy} from "./strategies/local.strategy";
 import {AuthController} from "./auth.controller";
 import {User} from "../user/entity/user.entity";
 import {getRepositoryToken} from "@nestjs/typeorm";
-import {withTestMeta} from "../../common/utils/test.util";
+import {withTestMeta} from "../../../../../libs/shared/src/utils/test.util";
 jest.mock("../user/entity/user.entity")
 
 describe('AuthService', () => {

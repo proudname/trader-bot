@@ -1,7 +1,7 @@
 import { Entity, Column } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '../enums';
-import BaseEntity from '../../../common/base.entity';
+import BaseEntity from '@shared/base.entity';
 
 
 export type FindByCredentialsParams = {
