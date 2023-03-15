@@ -1,4 +1,13 @@
-import {Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToMany, UpdateDateColumn} from "typeorm";
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    JoinColumn,
+    JoinTable,
+    ManyToMany,
+    OneToMany,
+    UpdateDateColumn
+} from "typeorm";
 import BaseEntity from '@shared/base.entity';
 import {TradingStrategyRule} from "./trading-strategy-rule.entity";
 import {StrategyStatus} from "../enums";
@@ -11,10 +20,10 @@ export class TradingStrategy extends BaseEntity {
     name: string;
 
     @ManyToMany(() => Selection)
-    @JoinColumn()
+    @JoinTable()
     items: DBRelation<Selection[]>;
 
-    @OneToMany(() => TradingStrategyRule, rule => rule.strategy)
+    @OneToMany(() => TradingStrategyRule, rule => rule.strategy, {cascade: true})
     @JoinColumn()
     rules: DBRelation<TradingStrategyRule[]>;
 

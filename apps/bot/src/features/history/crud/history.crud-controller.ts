@@ -4,10 +4,24 @@ import {Auth} from "../../auth/decorators/auth.decrator";
 import {UserRole} from "../../user/enums";
 import {HistoryCrudService} from "./history.crud-service";
 import {History} from '../entities/history.entity'
+import {GetOneHistoryDto} from "../dto/get-one-history.dto";
 
 @Crud({
     model: {
         type: History
+    },
+    serialize: {
+        get: GetOneHistoryDto
+    },
+    query: {
+        join: {
+            rule: {
+                eager: true,
+            },
+            item: {
+                eager: true,
+            }
+        }
     },
     routes: {}
 })

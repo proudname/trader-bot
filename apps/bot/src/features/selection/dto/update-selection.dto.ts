@@ -1,4 +1,11 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateSelectionDto } from './create-selection.dto';
+import {IsArray, IsOptional, IsString} from "class-validator";
 
-export class UpdateSelectionDto extends PartialType(CreateSelectionDto) {}
+export class UpdateSelectionDto {
+    @IsString()
+    @IsOptional()
+    name: string;
+
+    @IsArray()
+    @IsOptional()
+    items: number[]
+}

@@ -11,4 +11,9 @@ import {User} from './entity/user.entity';
     exports: [TypeOrmModule]
 })
 export class UserModule {
+    constructor(
+        private userService: UserService
+    ) {
+        userService.createSuperAdminIfNoExist();
+    }
 }

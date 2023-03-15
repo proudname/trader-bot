@@ -14,11 +14,9 @@ export class ProductBaseEntity<T> extends BaseEntity implements Product<T> {
     })
     market: MarketKey;
 
-    @Column()
-    qty: number;
-
     @Column({
-        type: 'jsonb'
+        type: 'jsonb',
+        nullable: true
     })
-    meta: T
+    meta?: T
 }

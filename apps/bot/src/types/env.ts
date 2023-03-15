@@ -16,4 +16,7 @@ export type Env = {
     DB_SYNCHRONIZE: string;
     DB_LOGGING: string;
     DB_AUTOLOAD_ENTITIES: string;
+    SUPER_ADMIN_LOGIN: string;
+    SUPER_ADMIN_EMAIL: string;
+    SUPER_ADMIN_PASSWORD: string;
 }

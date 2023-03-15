@@ -1,17 +1,17 @@
 import {Injectable} from '@nestjs/common';
 import {TypeOrmCrudService} from "@nestjsx/crud-typeorm";
 import {InjectRepository} from "@nestjs/typeorm";
-import {TradingStrategy} from "../entities/trading-strategy.entity";
 import {uniq} from "lodash";
+import {TradingStrategyRule} from "../entities/trading-strategy-rule.entity";
 
 @Injectable()
-export class StrategyCrudService extends TypeOrmCrudService<TradingStrategy> {
+export class StrategyRuleCrudService extends TypeOrmCrudService<TradingStrategyRule> {
     constructor(
-        @InjectRepository(TradingStrategy) repository
+        @InjectRepository(TradingStrategyRule) repository
     ) {
         super(repository);
     }
-    
+
     getSelect(query, options) {
         return uniq(super.getSelect(query, options))
     }
