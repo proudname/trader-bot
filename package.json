@@ -10,6 +10,7 @@
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
+    "panel:start:dev": "yarn --cwd apps/panel dev",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/trader-bot/main",
@@ -31,10 +32,13 @@
     "@nestjs/typeorm": "^9.0.1",
     "@nestjsx/crud": "^5.0.0-alpha.3",
     "@nestjsx/crud-typeorm": "^5.0.0-alpha.3",
+    "@tinkoff/invest-openapi-js-sdk": "^1.5.0",
+    "assert-never": "^1.2.1",
     "axios": "^1.2.6",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "lodash": "^4.17.21",
     "mathjs": "^11.5.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
@@ -91,11 +95,13 @@
     "testEnvironment": "node",
     "roots": [
       "<rootDir>/apps/",
-      "<rootDir>/libs/"
+      "<rootDir>/libs/markets",
+      "<rootDir>/libs/shared"
     ],
     "moduleNameMapper": {
-      "^shared/shared(|/.*)$": "<rootDir>/libs/shared/src/$1",
-      "^@markets/markets(|/.*)$": "<rootDir>/libs/markets/src/$1"
+      "^@shared/(.*)$": "<rootDir>/libs/shared/src/$1",
+      "^@markets/(.*)$": "<rootDir>/libs/markets/src/$1",
+      "^@markets$": "<rootDir>/libs/markets/src/index.ts"
     }
   }
 }

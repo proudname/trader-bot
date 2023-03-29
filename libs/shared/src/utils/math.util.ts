@@ -1,22 +1,26 @@
-import * as MH from 'mathjs';
+import {all, create} from 'mathjs';
+
+
+export const math = create({all})
+
+math.config({
+    number: 'Fraction',
+})
 
 export const getSumByPercent = (sum: number, prc: number): number => {
-  const rate = Math.abs(prc) / 100;
-  let rateBySign = 0;
-  switch (Math.sign(prc)) {
-    case 1:
-      rateBySign = rate + 1;
-      break;
-    case -1:
-      rateBySign = 1 - rate;
-      break;
-    default: return sum;
-  }
-  return MH.chain(rateBySign).multiply(sum).done()
+    const rate = math.chain(prc).abs().divide(100).done();
+    let rateBySign = 0;
+    switch (math.sign(prc)) {
+        case 1:
+            rateBySign = math.sum(rate, 1);
+            break;
+        case -1:
+            rateBySign = math.subtract(1, rate);
+            break;
+        default:
+            return sum;
+    }
+    return math.multiply(rateBySign, sum);
 };
 
 
-export const toFixedNum = (num: number, precision = 2, type: 'floor'|'ceil' = 'floor') => {
-  const multiplier = Math.pow(10, precision);
-  return Math[type](num * multiplier) * multiplier;
-}

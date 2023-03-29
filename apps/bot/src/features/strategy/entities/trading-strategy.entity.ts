@@ -10,22 +10,31 @@ import {
 } from "typeorm";
 import BaseEntity from '@shared/base.entity';
 import {TradingStrategyRule} from "./trading-strategy-rule.entity";
-import {StrategyStatus} from "../enums";
-import {DBRelation} from "../../../types";
 import {Selection} from '../../selection/entities/selection.entity';
+import {StrategyStatus} from "@shared/enums";
+import {MarketKey} from "@markets/enums";
+import {DBRelation} from "@shared/types";
+import {ITradingStrategy} from "@shared/strategy/trading-strategy.interface";
+import {ITradingStrategyRule} from "@shared/strategy/trading-strategy-rule.interface";
 
 @Entity()
-export class TradingStrategy extends BaseEntity {
+export class TradingStrategy extends BaseEntity implements ITradingStrategy {
     @Column({unique: true})
     name: string;
 
+    @Column({
+        type: 'varchar',
+        enum: MarketKey
+    })
+    market: MarketKey;
+
     @ManyToMany(() => Selection)
     @JoinTable()
-    items: DBRelation<Selection[]>;
+    items: DBRelation<Selection>[];
 
     @OneToMany(() => TradingStrategyRule, rule => rule.strategy, {cascade: true})
     @JoinColumn()
-    rules: DBRelation<TradingStrategyRule[]>;
+    rules: DBRelation<ITradingStrategyRule>[];
 
     @Column({type: 'varchar', enum: StrategyStatus, default: StrategyStatus.ENABLED})
     status: StrategyStatus;

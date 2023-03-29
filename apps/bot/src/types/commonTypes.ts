@@ -94,6 +94,4 @@ export type PolygonQuery = {
     perpage: number
 }
 
-export type DBRelation<T, I = number> = T | I | null
-
 export type EntityId = number;

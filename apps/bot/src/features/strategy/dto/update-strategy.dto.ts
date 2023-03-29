@@ -1,6 +1,6 @@
 import {IsArray, IsEnum, IsOptional, IsString} from "class-validator";
 import {TradingStrategyRule} from "../entities/trading-strategy-rule.entity";
-import {StrategyStatus} from "../enums";
+import {StrategyStatus} from "@shared/enums";
 
 export class UpdateStrategyDto {
     @IsString()

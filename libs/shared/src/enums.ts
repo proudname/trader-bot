@@ -18,3 +18,8 @@ export enum BrokerType {
     Tinkoff,
     Binance
 }
+
+export enum StrategyStatus {
+    ENABLED,
+    DISABLED
+}
