@@ -1,12 +1,12 @@
-import {IsEnum, IsNumber, IsString} from "class-validator";
-import {MarketKey} from "@markets/enums";
+import {IsNumber, IsObject, IsString} from "class-validator";
 
 export class CreateSelectionItemDto {
+
+    @IsObject()
+    catalogItem: { id: number }
+
     @IsNumber()
     maxQty: number
-
-    @IsEnum(MarketKey)
-    market: MarketKey
 
     @IsString()
     title: string

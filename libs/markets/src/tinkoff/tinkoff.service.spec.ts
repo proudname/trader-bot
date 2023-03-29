@@ -4,6 +4,8 @@ import {MarketsService} from "@markets";
 import {MarketKey} from "@markets/enums";
 import {DecideEnum, StrategyStatus, TradeAction, TradingRuleStatus} from "@shared/enums";
 import {ObservablesService} from "@markets/observables.service";
+import {getRepositoryToken} from "@nestjs/typeorm";
+import {TradingStrategy} from "../../../../apps/bot/src/features/strategy/entities/trading-strategy.entity";
 
 let limitOrderFn;
 let candleFn;
@@ -36,12 +38,18 @@ describe('TinkoffService', () => {
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                TinkoffService, ObservablesService, {
+                TinkoffService,
+                ObservablesService,
+                {
                     provide: MarketsService,
                     useValue: {
                         register: jest.fn(),
                         executeOrder: executeFn
                     }
+                },
+                {
+                    provide: getRepositoryToken(TradingStrategy),
+                    useValue: {}
                 }
             ],
         }).compile();

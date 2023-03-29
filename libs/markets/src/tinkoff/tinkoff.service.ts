@@ -15,6 +15,9 @@ import {SelectionItem} from "../../../../apps/bot/src/features/selection/entitie
 import {MarketsService} from "@markets";
 import {MarketKey} from "@markets/enums";
 import {ObservablePrice, ObservablesService} from "@markets/observables.service";
+import {CatalogItem} from "../../../../apps/bot/src/features/catalog/entities/catalog-item.entity";
+import {InjectRepository} from "@nestjs/typeorm";
+import {Repository} from "typeorm";
 
 type TinkoffItemMeta = { code: string, figi: string };
 
@@ -39,7 +42,8 @@ export class TinkoffService implements IMarketService {
 
     constructor(
         private marketsService: MarketsService,
-        private observablesService: ObservablesService
+        private observablesService: ObservablesService,
+        @InjectRepository(TradingStrategy) private strategyRepository: Repository<TradingStrategy>
     ) {
         marketsService.register(MarketKey.TINKOFF, this);
     }
@@ -47,12 +51,14 @@ export class TinkoffService implements IMarketService {
     async observe(params: ObserveParams): Promise<void> {
         const strategy = await this.loadStrategy(params.strategyId);
         for (const selection of strategy.items as ISelection[]) {
-            for (const item of selection.items as ISelectionItem<TinkoffItemMeta>[]) {
+            for (const item of selection.items as ISelectionItem[]) {
 
-                let observer = this.observablesService.get(item.meta.code);
+                const catalogItem = item.catalogItem as CatalogItem<TinkoffItemMeta>;
+
+                let observer = this.observablesService.get(catalogItem.meta.code);
                 if (!observer) {
-                    observer = this.observePrice(item.meta.figi);
-                    this.observablesService.set(item.meta.code, observer)
+                    observer = this.observePrice(catalogItem.meta.figi);
+                    this.observablesService.set(catalogItem.meta.code, observer)
                 }
 
                 const subscription = observer.subscribe((output) => {
@@ -68,10 +74,10 @@ export class TinkoffService implements IMarketService {
                 if (!strategySubscriptions) {
                     strategySubscriptions = new Map<string, Subscription>();
                 }
-                if (strategySubscriptions.has(item.meta.code)) {
-                    strategySubscriptions.get(item.meta.code).unsubscribe();
+                if (strategySubscriptions.has(catalogItem.meta.code)) {
+                    strategySubscriptions.get(catalogItem.meta.code).unsubscribe();
                 }
-                strategySubscriptions.set(item.meta.code, subscription);
+                strategySubscriptions.set(catalogItem.meta.code, subscription);
                 this.subscriptions.set(params.strategyId, strategySubscriptions)
             }
         }
@@ -95,12 +101,12 @@ export class TinkoffService implements IMarketService {
     }
 
     async loadStrategy(strategyId: number): Promise<TradingStrategy> {
-        const strategy = await TradingStrategy.findOne({
+        const strategy = await this.strategyRepository.findOne({
             where: {
                 id: strategyId,
                 status: StrategyStatus.ENABLED
             },
-            relations: ['rules'],
+            relations: ['rules', 'items', 'items.items', 'items.items.catalogItem'],
             cache: 60000,
         });
 
@@ -175,14 +181,15 @@ export class TinkoffService implements IMarketService {
     async applyDecision(params: ApplyDecisionParams): Promise<PlacedLimitOrder> {
 
         const {decision, item} = params;
+        const catalogItem = item.catalogItem as CatalogItem<TinkoffItemMeta>;
 
         const {
             qty,
             action,
-        } = await this.adjustDecision(decision, item.meta.figi);
+        } = await this.adjustDecision(decision, catalogItem.meta.figi);
 
         const orderData: LimitOrderRequest & FIGI = {
-            figi: item.meta.figi,
+            figi: catalogItem.meta.figi,
             operation: action === DecideEnum.BUY ? "Buy" : "Sell",
             lots: qty,
             price: Math.floor(decision.sum * 100) / 100

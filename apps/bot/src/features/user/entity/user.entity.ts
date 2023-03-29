@@ -1,7 +1,6 @@
-import {Column, Entity} from 'typeorm';
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import {UserRole} from '../enums';
-import BaseEntity from '@shared/base.entity';
 
 
 export type FindByCredentialsParams = {
@@ -10,6 +9,9 @@ export type FindByCredentialsParams = {
 
 @Entity()
 export class User extends BaseEntity {
+
+    @PrimaryGeneratedColumn()
+    id: number;
 
     @Column({unique: true})
     login: string;

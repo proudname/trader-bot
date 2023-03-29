@@ -1,9 +1,9 @@
-import { PrimaryGeneratedColumn, BaseEntity as TypeormBaseEntity } from 'typeorm';
+import {PrimaryGeneratedColumn} from 'typeorm';
 
 
-export abstract class BaseEntity extends TypeormBaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+export abstract class BaseEntity {
+    @PrimaryGeneratedColumn()
+    id: number;
 }
 
 export default BaseEntity;

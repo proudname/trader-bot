@@ -73,15 +73,13 @@ export class MarketsService {
             await queryRunner.manager.save(actualRule);
 
             let actualPortfolioItem = await queryRunner.manager.findOneBy<PortfolioItem>(PortfolioItem, {
-                title: item.title,
-                market: item.market,
+                catalogItem: item.catalogItem as number,
             });
 
             if (!actualPortfolioItem) {
                 actualPortfolioItem = new PortfolioItem();
-                actualPortfolioItem.title = item.title;
-                actualPortfolioItem.market = item.market;
-                actualPortfolioItem.meta = item.meta;
+                actualPortfolioItem.catalogItem = item.catalogItem as number;
+                actualPortfolioItem.market = market;
             }
 
             actualPortfolioItem.qty += executedLots;

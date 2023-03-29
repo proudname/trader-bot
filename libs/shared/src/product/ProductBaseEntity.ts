@@ -9,10 +9,10 @@ export class ProductBaseEntity<T> extends BaseEntity implements Product<T> {
     title: string;
 
     @Column({
-        type: 'varchar',
-        enum: MarketKey
+        type: 'text',
+        array: true
     })
-    market: MarketKey;
+    markets: MarketKey[];
 
     @Column({
         type: 'jsonb',

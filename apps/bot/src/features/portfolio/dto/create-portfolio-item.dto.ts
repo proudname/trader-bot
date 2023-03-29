@@ -1,7 +1,11 @@
-import {IsEnum, IsNumber, IsString} from "class-validator";
+import {IsEnum, IsNumber, IsObject, IsString} from "class-validator";
 import {MarketKey} from "@markets/enums";
 
 export class CreatePortfolioItemDto {
+
+    @IsObject()
+    catalogItem: { id: number }
+
     @IsNumber()
     qty: number
 
