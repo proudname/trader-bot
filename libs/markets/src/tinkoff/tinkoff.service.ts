@@ -4,9 +4,8 @@ import {ApplyDecisionParams, IMarketService, ObserveParams, StopObserveParams} f
 import {Observable, Subscription, throwError, timeoutWith} from "rxjs";
 import {TinkoffInstrumentInfoMessage} from "@markets/tinkoff/types";
 import {DoActionDecision} from "@markets/decision-maker";
-import {DecideEnum, StrategyStatus} from "@shared/enums";
+import {DecideEnum} from "@shared/enums";
 import {DecisionValidationError} from "@markets/errors/DecisionValidationError";
-import {TradingStrategy} from "../../../../apps/bot/src/features/strategy/entities/trading-strategy.entity";
 import {ITradingStrategyRule} from "@shared/strategy/trading-strategy-rule.interface";
 import _ from "lodash";
 import {ISelection} from "@shared/selection/selection.interface";
@@ -16,8 +15,7 @@ import {MarketsService} from "@markets";
 import {MarketKey} from "@markets/enums";
 import {ObservablePrice, ObservablesService} from "@markets/observables.service";
 import {CatalogItem} from "../../../../apps/bot/src/features/catalog/entities/catalog-item.entity";
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
+import {StrategyService} from "../../../../apps/bot/src/features/strategy/strategy.service";
 
 type TinkoffItemMeta = { code: string, figi: string };
 
@@ -43,13 +41,13 @@ export class TinkoffService implements IMarketService {
     constructor(
         private marketsService: MarketsService,
         private observablesService: ObservablesService,
-        @InjectRepository(TradingStrategy) private strategyRepository: Repository<TradingStrategy>
+        private strategyService: StrategyService,
     ) {
         marketsService.register(MarketKey.TINKOFF, this);
     }
 
     async observe(params: ObserveParams): Promise<void> {
-        const strategy = await this.loadStrategy(params.strategyId);
+        const strategy = await this.strategyService.loadStrategy(params.strategyId);
         for (const selection of strategy.items as ISelection[]) {
             for (const item of selection.items as ISelectionItem[]) {
 
@@ -87,7 +85,7 @@ export class TinkoffService implements IMarketService {
         const {averagePrice, targetPrice, strategyId, item} = params;
 
         // reload strategy from db
-        const strategy = await this.loadStrategy(strategyId);
+        const strategy = await this.strategyService.loadStrategy(strategyId);
 
         strategy.rules.map((rule: ITradingStrategyRule) => {
             return this.marketsService.executeOrder({
@@ -98,21 +96,6 @@ export class TinkoffService implements IMarketService {
                 market: MarketKey.TINKOFF
             });
         })
-    }
-
-    async loadStrategy(strategyId: number): Promise<TradingStrategy> {
-        const strategy = await this.strategyRepository.findOne({
-            where: {
-                id: strategyId,
-                status: StrategyStatus.ENABLED
-            },
-            relations: ['rules', 'items', 'items.items', 'items.items.catalogItem'],
-            cache: 60000,
-        });
-
-        if (!strategy) throw new Error(`Strategy with id ${strategy.id} disabled or not exists`);
-
-        return strategy;
     }
 
 

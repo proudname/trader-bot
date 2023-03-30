@@ -1,0 +1,1 @@
+export const getStrategyCacheKey = (strategyId: string | number) => `strategy:${strategyId}`;

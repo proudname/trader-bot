@@ -8,7 +8,8 @@ import {PortfolioItemService} from "./portfolio-item.service";
 @Module({
     imports: [TypeOrmModule.forFeature([PortfolioItem])],
     controllers: [PortfolioItemCrudController],
-    providers: [PortfolioItemCrudService, PortfolioItemService]
+    providers: [PortfolioItemCrudService, PortfolioItemService],
+    exports: [TypeOrmModule, PortfolioItemService]
 })
 export class PortfolioModule {
 }

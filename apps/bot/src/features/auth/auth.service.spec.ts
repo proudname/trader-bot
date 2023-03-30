@@ -5,8 +5,9 @@ import {JwtModule} from "@nestjs/jwt";
 import {LocalStrategy} from "./strategies/local.strategy";
 import {AuthController} from "./auth.controller";
 import {User} from "../user/entity/user.entity";
+import {ConfigModule} from "@nestjs/config";
+import {UserModule} from "../user/user.module";
 import {getRepositoryToken} from "@nestjs/typeorm";
-import {withTestMeta} from "../../../../../libs/shared/src/utils/test.util";
 
 jest.mock("../user/entity/user.entity")
 
@@ -18,8 +19,14 @@ describe('AuthService', () => {
     let module: TestingModule;
 
     beforeEach(async () => {
-        module = await Test.createTestingModule(withTestMeta({
+        module = await Test.createTestingModule({
             imports: [
+                ConfigModule.forRoot(
+                    {
+                        isGlobal: true,
+                    }
+                ),
+                UserModule,
                 PassportModule,
                 JwtModule.register({
                     secret: options.jwtKey,
@@ -31,11 +38,11 @@ describe('AuthService', () => {
                 AuthService,
                 {
                     provide: getRepositoryToken(User),
-                    useValue: User
+                    useValue: {}
                 }
             ],
             controllers: [AuthController],
-        })).compile();
+        }).compile();
 
         service = module.get<AuthService>(AuthService);
 

@@ -4,7 +4,7 @@ import {MarketsService} from "@markets";
 import {MarketKey} from "@markets/enums";
 import {DecideEnum, StrategyStatus, TradeAction, TradingRuleStatus} from "@shared/enums";
 import {ObservablesService} from "@markets/observables.service";
-import {getRepositoryToken} from "@nestjs/typeorm";
+import {StrategyService} from "../../../../apps/bot/src/features/strategy/strategy.service";
 import {TradingStrategy} from "../../../../apps/bot/src/features/strategy/entities/trading-strategy.entity";
 
 let limitOrderFn;
@@ -48,80 +48,94 @@ describe('TinkoffService', () => {
                     }
                 },
                 {
-                    provide: getRepositoryToken(TradingStrategy),
-                    useValue: {}
+                    provide: StrategyService,
+                    useValue: {
+                        loadStrategy: jest.fn().mockImplementation(async (): Promise<TradingStrategy> => {
+                            return {
+                                id: 1,
+                                name: 'test',
+                                status: StrategyStatus.ENABLED,
+                                market: MarketKey.TINKOFF,
+                                items: [
+                                    {
+                                        id: 1,
+                                        name: 'test selection',
+                                        market: MarketKey.TINKOFF,
+                                        items: [
+                                            {
+                                                id: 1,
+                                                catalogItem: {
+                                                    id: 1,
+                                                    title: 'Test1',
+                                                    markets: [MarketKey.TINKOFF],
+                                                    meta: {code: 'Test1', figi: 'Test1'},
+                                                },
+                                                targetPrice: 100,
+                                                maxQty: 10,
+                                            },
+                                            {
+                                                id: 1,
+                                                catalogItem: {
+                                                    id: 2,
+                                                    title: 'Test2',
+                                                    markets: [MarketKey.TINKOFF],
+                                                    meta: {code: 'Test2', figi: 'Test2'},
+                                                },
+                                                targetPrice: 100,
+                                                maxQty: 10,
+                                            },
+                                        ]
+                                    }
+                                ],
+                                rules: [
+                                    {
+                                        id: 1,
+                                        change: -10,
+                                        qty: 10,
+                                        used: 5,
+                                        status: TradingRuleStatus.ACTIVE,
+                                        strategy: 1,
+                                        action: TradeAction.BUY
+                                    },
+                                    {
+                                        id: 1,
+                                        change: -10,
+                                        qty: 10,
+                                        used: 5,
+                                        status: TradingRuleStatus.ACTIVE,
+                                        strategy: 1,
+                                        action: TradeAction.BUY
+                                    },
+                                    {
+                                        id: 1,
+                                        change: -10,
+                                        qty: 10,
+                                        used: 5,
+                                        status: TradingRuleStatus.ACTIVE,
+                                        strategy: 1,
+                                        action: TradeAction.BUY
+                                    },
+                                    {
+                                        id: 1,
+                                        change: -10,
+                                        qty: 10,
+                                        used: 5,
+                                        status: TradingRuleStatus.ACTIVE,
+                                        strategy: 1,
+                                        action: TradeAction.BUY
+                                    }
+                                ],
+                                createdAt: new Date(),
+                                updatedAt: new Date()
+                            }
+                        }),
+                    }
                 }
             ],
         }).compile();
 
-        service = module.get<TinkoffService>(TinkoffService);
+        service = module.get(TinkoffService);
 
-        jest.spyOn(service, 'loadStrategy').mockImplementation(async (): Promise<any> => {
-            return {
-                id: 1,
-                name: 'test',
-                status: StrategyStatus.ENABLED,
-                items: [
-                    {
-                        id: 1,
-                        market: MarketKey.TINKOFF,
-                        items: [
-                            {
-                                id: 1,
-                                title: 'Test2',
-                                meta: {code: 'Test2', figi: 'Test2'},
-                                targetPrice: 100,
-                                maxQty: 10,
-                            },
-                            {
-                                id: 1,
-                                title: 'Test3',
-                                meta: {code: 'Test3', figi: 'Test3'},
-                                targetPrice: 100,
-                                maxQty: 10,
-                            },
-                        ]
-                    }],
-                rules: [
-                    {
-                        id: 1,
-                        change: -10,
-                        qty: 10,
-                        used: 5,
-                        status: TradingRuleStatus.ACTIVE,
-                        strategy: 1,
-                        action: TradeAction.BUY
-                    },
-                    {
-                        id: 1,
-                        change: -10,
-                        qty: 10,
-                        used: 5,
-                        status: TradingRuleStatus.ACTIVE,
-                        strategy: 1,
-                        action: TradeAction.BUY
-                    },
-                    {
-                        id: 1,
-                        change: -10,
-                        qty: 10,
-                        used: 5,
-                        status: TradingRuleStatus.ACTIVE,
-                        strategy: 1,
-                        action: TradeAction.BUY
-                    },
-                    {
-                        id: 1,
-                        change: -10,
-                        qty: 10,
-                        used: 5,
-                        status: TradingRuleStatus.ACTIVE,
-                        strategy: 1,
-                        action: TradeAction.BUY
-                    }
-                ]
-            }
-        })
     });
 
     afterEach(() => {
@@ -139,11 +153,15 @@ describe('TinkoffService', () => {
             strategyId: 1,
             item: {
                 id: 1,
-                title: 'Test2',
-                meta: {code: 'Test2', figi: 'Test2'},
+                catalogItem: {
+                    id: 1,
+                    title: 'Test2',
+                    markets: [MarketKey.TINKOFF],
+                    meta: {code: 'Test2', figi: 'Test2'},
+                },
                 targetPrice: 100,
                 maxQty: 10,
-            } as any,
+            },
         })
         expect(executeFn).toHaveBeenCalledTimes(4);
     });
@@ -157,11 +175,16 @@ describe('TinkoffService', () => {
             },
             item: {
                 id: 1,
-                title: 'Test2',
-                meta: {code: 'Test2', figi: 'Test2'},
+                catalogItem: {
+                    id: 1,
+                    markets: [MarketKey.TINKOFF],
+                    title: 'Test2',
+                    meta: {code: 'Test2', figi: 'Test2'},
+                },
+
                 targetPrice: 100,
                 maxQty: 10,
-            } as any
+            }
         })
 
         expect(limitOrderFn).toHaveBeenCalled();

@@ -11,6 +11,7 @@ import {History} from "../../../apps/bot/src/features/history/entities/history.e
 import {HistoryService} from "../../../apps/bot/src/features/history/history.service";
 import {PortfolioItemService} from "../../../apps/bot/src/features/portfolio/portfolio-item.service";
 import {DataSource} from "typeorm";
+import {StrategyService} from "../../../apps/bot/src/features/strategy/strategy.service";
 
 type ExecuteOrderParams = {
     rule: ITradingStrategyRule,
@@ -28,6 +29,7 @@ export class MarketsService {
     constructor(
         private historyService: HistoryService,
         private portfolioService: PortfolioItemService,
+        private strategyService: StrategyService,
         private dataSource: DataSource
     ) {
     }
@@ -109,6 +111,13 @@ export class MarketsService {
             // you need to release a queryRunner which was manually instantiated
             await queryRunner.release();
         }
-
     }
+
+    async initializeObservers() {
+        for await (const strategy of this.strategyService.getStrategiesToObserve()) {
+            const service = this.markets.get(strategy.market);
+            await service.observe({strategyId: strategy.id});
+        }
+    }
+
 }
