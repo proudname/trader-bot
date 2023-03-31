@@ -1,8 +1,8 @@
 import {Controller} from '@nestjs/common';
 import {Crud, CrudController} from '@nestjsx/crud';
-import {User} from './entity/user.entity';
-import {UserService} from './user.service';
-import {Auth} from "../auth/decorators/auth.decrator";
+import {User} from '../entity/user.entity';
+import {Auth} from "../../auth/decorators/auth.decrator";
+import {UserCrudService} from "./user.crud-service";
 
 @Crud({
     model: {
@@ -17,7 +17,7 @@ import {Auth} from "../auth/decorators/auth.decrator";
 })
 @Auth()
 @Controller('api/users')
-export class UserController implements CrudController<User> {
-    constructor(public service: UserService) {
+export class UserCrudController implements CrudController<User> {
+    constructor(public service: UserCrudService) {
     }
 }

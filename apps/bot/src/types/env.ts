@@ -2,6 +2,7 @@ import {DataSourceOptions} from "typeorm";
 
 
 export type Env = {
+    NODE_ENV: 'test' | 'development' | 'production';
     TIN_SOCKET_KEY: string
     TIN_SANDBOX_KEY: string
     TIN_KEY: string;
@@ -16,6 +17,7 @@ export type Env = {
     DB_SYNCHRONIZE: string;
     DB_LOGGING: string;
     DB_AUTOLOAD_ENTITIES: string;
+    SUPER_ADMIN_CREATE: string;
     SUPER_ADMIN_LOGIN: string;
     SUPER_ADMIN_EMAIL: string;
     SUPER_ADMIN_PASSWORD: string;

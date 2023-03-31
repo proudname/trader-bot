@@ -1,6 +1,5 @@
 import {Injectable} from '@nestjs/common';
-import {TypeOrmCrudService} from '@nestjsx/crud-typeorm';
-import {User} from './entity/user.entity';
+import {FindByCredentialsParams, User} from './entity/user.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from "typeorm";
 import {ConfigService} from "@nestjs/config";
@@ -8,12 +7,18 @@ import {Env} from "../../types";
 import {UserRole} from "./enums";
 
 @Injectable()
-export class UserService extends TypeOrmCrudService<User> {
+export class UserService {
     constructor(
         @InjectRepository(User) private userRepository: Repository<User>,
         private configService: ConfigService<Env>
     ) {
-        super(userRepository);
+    }
+
+    async findByCredentials(credentials: FindByCredentialsParams) {
+        return this.userRepository.createQueryBuilder('u')
+            .addSelect('u.password')
+            .where('u.login = :login', {login: credentials.login})
+            .getOne();
     }
 
     async createSuperAdminIfNoExist() {
@@ -24,6 +29,6 @@ export class UserService extends TypeOrmCrudService<User> {
         superAdmin.email = this.configService.getOrThrow('SUPER_ADMIN_EMAIL');
         superAdmin.roles = [UserRole.SUPER_ADMIN];
         await superAdmin.setPassword(this.configService.getOrThrow('SUPER_ADMIN_PASSWORD'))
-        await superAdmin.save();
+        await this.userRepository.save(superAdmin);
     }
 }

@@ -6,8 +6,8 @@ import {LocalStrategy} from "./strategies/local.strategy";
 import {AuthController} from "./auth.controller";
 import {User} from "../user/entity/user.entity";
 import {ConfigModule} from "@nestjs/config";
-import {UserModule} from "../user/user.module";
 import {getRepositoryToken} from "@nestjs/typeorm";
+import {UserService} from "../user/user.service";
 
 jest.mock("../user/entity/user.entity")
 
@@ -17,8 +17,12 @@ describe('AuthService', () => {
 
     let service: AuthService;
     let module: TestingModule;
+    let findOne;
+    let createQueryBuilder;
 
     beforeEach(async () => {
+        findOne = jest.fn();
+        createQueryBuilder = jest.fn();
         module = await Test.createTestingModule({
             imports: [
                 ConfigModule.forRoot(
@@ -26,7 +30,6 @@ describe('AuthService', () => {
                         isGlobal: true,
                     }
                 ),
-                UserModule,
                 PassportModule,
                 JwtModule.register({
                     secret: options.jwtKey,
@@ -36,9 +39,19 @@ describe('AuthService', () => {
             providers: [
                 LocalStrategy,
                 AuthService,
+                UserService,
                 {
                     provide: getRepositoryToken(User),
-                    useValue: {}
+                    useValue: {
+                        findOne,
+                        save: jest.fn().mockImplementation(async function () {
+                            const user = new User();
+                            user.id = 1;
+                            Object.assign(this, user);
+                            return user;
+                        }),
+                        createQueryBuilder,
+                    }
                 }
             ],
             controllers: [AuthController],
@@ -66,13 +79,7 @@ describe('AuthService', () => {
 
     it('should register a user', async () => {
 
-        jest.spyOn(User.prototype, 'save')
-            .mockImplementation(async function () {
-                const user = new User();
-                user.id = 1;
-                Object.assign(this, user);
-                return user;
-            })
+        findOne = jest.fn().mockImplementation(() => undefined);
 
         const user = await service.signUp({
             firstname: 'TestName',
@@ -107,8 +114,7 @@ describe('AuthService', () => {
         user.login = findParams.login;
         await user.setPassword(findParams.password);
 
-        jest.spyOn(User, 'findByCredentials')
-            .mockImplementation(async () => user)
+        jest.spyOn(UserService.prototype, 'findByCredentials').mockImplementation(async () => user)
 
         const foundUser = await service.findUserByCredentials(findParams);
 

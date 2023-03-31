@@ -1,6 +1,7 @@
-import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity} from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import {UserRole} from '../enums';
+import BaseEntity from "@shared/base.entity";
 
 
 export type FindByCredentialsParams = {
@@ -9,9 +10,6 @@ export type FindByCredentialsParams = {
 
 @Entity()
 export class User extends BaseEntity {
-
-    @PrimaryGeneratedColumn()
-    id: number;
 
     @Column({unique: true})
     login: string;
@@ -33,13 +31,6 @@ export class User extends BaseEntity {
 
     static async comparePasswords(password: string, hash: string) {
         return bcrypt.compare(password, hash);
-    }
-
-    static findByCredentials(credentials: FindByCredentialsParams) {
-        return this.createQueryBuilder('u')
-            .addSelect('u.password')
-            .where('u.login = :login', {login: credentials.login})
-            .getOne();
     }
 
     async setPassword(password: string) {

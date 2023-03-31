@@ -6,6 +6,7 @@ import {User} from '../user/entity/user.entity';
 import {plainToClass} from "class-transformer";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
+import {UserService} from "../user/user.service";
 
 
 export type FindUserByCredentialsParams = {
@@ -22,12 +23,13 @@ export class AuthService {
     constructor(
         private jwtService: JwtService,
         @InjectRepository(User) private readonly userRepository: Repository<User>,
+        private readonly userService: UserService,
     ) {
     }
 
     findUserByCredentials = async (params: FindUserByCredentialsParams): Promise<AuthUserData | undefined> => {
         const {login, password} = params;
-        const user = await User.findByCredentials({login});
+        const user = await this.userService.findByCredentials({login});
         if (!user) return;
         const {password: hash} = user;
         const isPasswordCorrect = await User.comparePasswords(password, hash);
@@ -56,8 +58,7 @@ export class AuthService {
         try {
             const user = plainToClass(User, userData);
             await user.setPassword(password);
-            await this.userRepository.save(user)
-            return user;
+            return this.userRepository.save(user)
         } catch (e) {
             this.logger.error('Ошибка при сохранении пользователя', e);
             throw new InternalServerErrorException('Ошибка при сохранении пользователя');
