@@ -1,4 +1,4 @@
-import {CacheModule, Module} from '@nestjs/common';
+import {Module} from '@nestjs/common';
 import {StrategyCrudController} from "./crud/strategy.crud-controller";
 import {StrategyCrudService} from "./crud/strategy.crud-service";
 import {TypeOrmModule} from "@nestjs/typeorm";
@@ -9,7 +9,7 @@ import {StrategyRuleCrudService} from "./crud/strategy-rule.crud-service";
 import {StrategyService} from "./strategy.service";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([TradingStrategy, TradingStrategyRule]), CacheModule.register()],
+    imports: [TypeOrmModule.forFeature([TradingStrategy, TradingStrategyRule])],
     controllers: [StrategyCrudController, StrategyRuleCrudController],
     providers: [StrategyCrudService, StrategyRuleCrudService, StrategyService],
     exports: [TypeOrmModule, StrategyService]

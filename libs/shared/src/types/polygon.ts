@@ -1,27 +1,16 @@
 export type PolygonTicker = {
-    "ticker": "AAPL",
-    "name": "Apple Inc.",
-    "market": "STOCKS",
-    "locale": "US",
-    "currency": "USD",
-    "active": true,
-    "primaryExch": "NGS",
-    "type": "cs",
-    "codes"?: {
-        "cik": "0000320193",
-        "figiuid": "EQ0010169500001000",
-        "scfigi": "BBG001S5N8V8",
-        "cfigi": "BBG000B9XRY4",
-        "figi": "BBG000B9Y5X2"
-    },
-    "attrs"?: {
-        "currencyName": "Australian dollar,",
-        "currency": "AUD,",
-        "baseName": "United Arab Emirates dirham,",
-        "base": "AED"
-    },
-    "updated": "2019-01-15T00:00:00.000Z",
-    "url": "https://api.polygon.io/v2/reference/tickers/AAPL"
+    ticker: 'A',
+    name: 'Agilent Technologies Inc.',
+    market: 'stocks',
+    locale: 'us',
+    primary_exchange: 'XNYS',
+    type: 'CS',
+    active: true,
+    currency_name: 'usd',
+    cik: '0001090872',
+    composite_figi: 'BBG000C2V3D6',
+    share_class_figi: 'BBG001SCTQY4',
+    last_updated_utc: '2023-03-30T00:00:00Z'
 }
 
 export type PolygonTickersResponse = {
@@ -29,5 +18,5 @@ export type PolygonTickersResponse = {
     "perPage": number,
     "count": number,
     "status": "OK" | "ERROR",
-    "tickers": PolygonTicker[]
+    "results": PolygonTicker[]
 }

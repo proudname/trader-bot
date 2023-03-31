@@ -3,11 +3,22 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import {CatalogItemCrudController} from "./crud/catalog-item.crud-controller";
 import {CatalogItemCrudService} from "./crud/catalog-item.crud-service";
 import {CatalogItem} from "./entities/catalog-item.entity";
+import {BullModule} from "@nestjs/bull";
+import {CatalogProcessor} from "./selection-item.processor";
+import PolygonApi from "@shared/api/polygon.api";
+import {HttpModule} from "@nestjs/axios";
+import {CatalogService} from "./catalog.service";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([CatalogItem])],
+    imports: [
+        HttpModule,
+        BullModule.registerQueue({
+            name: 'catalog',
+        }),
+        TypeOrmModule.forFeature([CatalogItem])
+    ],
     controllers: [CatalogItemCrudController],
-    providers: [CatalogItemCrudService],
+    providers: [CatalogItemCrudService, CatalogProcessor, PolygonApi, CatalogService],
 })
 export class CatalogModule {
 }

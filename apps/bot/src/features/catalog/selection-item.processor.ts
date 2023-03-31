@@ -3,13 +3,12 @@ import {CACHE_MANAGER, Inject, Logger} from '@nestjs/common';
 import {promisify} from 'util';
 import {Cache} from 'cache-manager';
 import {plainToClass} from "class-transformer";
-import _ from "lodash";
 import {PolygonTicker} from "../../types";
 import PolygonApi from "@shared/api/polygon.api";
 import {CatalogItem} from "./entities/catalog-item.entity";
 import {MarketKey} from "@markets/enums";
 import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
+import {ArrayContains, Repository} from "typeorm";
 
 const delay = promisify(setTimeout);
 
@@ -19,7 +18,7 @@ export class CatalogProcessor {
     // cached last page number ttl, 1 day
     pageTTL = 60 * 60 * 24;
 
-    requestDelay = 100;
+    requestDelay = 1000;
     private readonly logger = new Logger(CatalogProcessor.name);
 
     constructor(
@@ -69,7 +68,10 @@ export class CatalogProcessor {
         while (payload.page) {
             const data = await this.polygonApi.makeLoadTickerListQuery(payload);
             if (!data) return;
-            for (const ticker of data.tickers) yield ticker;
+            for (const ticker of data.results) {
+                console.log(ticker);
+                yield ticker;
+            }
             if (this.checkIsUploadFinished(data, payload.page)) return;
             // we can continue uploading from the last page even server goes down
             await this.cacheManager.set('tickers_last_page', ++payload.page, this.pageTTL)
@@ -79,20 +81,18 @@ export class CatalogProcessor {
     async handleUploadedTicker(loadedTicker: PolygonTicker): Promise<void> {
 
         const {
-            codes,
+            composite_figi,
             ticker: tickerName,
             name: companyName
         } = loadedTicker;
 
-        const cfigi = _.get(codes, 'cfigi');
         // cfigi field used by tinkoff investments
-        if (!cfigi) return;
+        if (!composite_figi) return;
 
         const item = await this.catalogItemRepository.findOne({
             where: {
-                meta: {
-                    figi: cfigi
-                }
+                title: tickerName,
+                markets: ArrayContains([MarketKey.TINKOFF])
             }
         })
 
@@ -101,7 +101,7 @@ export class CatalogProcessor {
             title: tickerName,
             markets: [MarketKey.TINKOFF],
             meta: {
-                figi: cfigi,
+                figi: composite_figi,
                 companyName,
             }
         })
