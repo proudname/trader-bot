@@ -5,19 +5,18 @@ import {SelectionCrudService} from "./selection.crud-service";
 import {Auth} from "../../auth/decorators/auth.decrator";
 import {CreateSelectionDto} from "../dto/create-selection.dto";
 import {UpdateSelectionDto} from "../dto/update-selection.dto";
-import {GetOneSelectionDto} from "../dto/get-one-selection.dto";
 
 @Crud({
     model: {
         type: Selection
     },
     routes: {},
-    serialize: {
-        get: GetOneSelectionDto
-    },
     query: {
         join: {
             items: {
+                eager: true,
+            },
+            'items.catalogItem': {
                 eager: true,
             }
         }

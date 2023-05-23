@@ -34,7 +34,7 @@ export type PolygonTicker = {
     ticker: 'A',
     name: 'Agilent Technologies Inc.',
     market: 'stocks',
-    locale: 'us',
+    locale: string,
     primary_exchange: 'XNYS',
     type: 'CS',
     active: true,

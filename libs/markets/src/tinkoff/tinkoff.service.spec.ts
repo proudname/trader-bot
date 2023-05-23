@@ -11,20 +11,18 @@ let limitOrderFn;
 let candleFn;
 
 jest.mock('@tinkoff/invest-openapi-js-sdk', () => {
-    return {
-        __esModule: true,
-        default: jest.fn().mockImplementation(() => {
-            return {
-                limitOrder: limitOrderFn,
-                instrumentInfo: (params: any, cb: (mes: any) => any) => {
-                    cb({
-                        trade_status: 'normal_trading',
-                    });
-                },
-                candle: candleFn
-            };
-        }),
-    };
+    return jest.fn().mockImplementation(() => {
+        return {
+            limitOrder: limitOrderFn,
+            instrumentInfo: (params: any, cb: (mes: any) => any) => {
+                cb({
+                    trade_status: 'normal_trading',
+                });
+            },
+            onStreamingError: jest.fn(),
+            candle: candleFn
+        };
+    });
 });
 
 describe('TinkoffService', () => {
@@ -50,7 +48,7 @@ describe('TinkoffService', () => {
                 {
                     provide: StrategyService,
                     useValue: {
-                        loadStrategy: jest.fn().mockImplementation(async (): Promise<TradingStrategy> => {
+                        loadStrategyForObserve: jest.fn().mockImplementation(async (): Promise<TradingStrategy> => {
                             return {
                                 id: 1,
                                 name: 'test',
@@ -72,6 +70,7 @@ describe('TinkoffService', () => {
                                                 },
                                                 targetPrice: 100,
                                                 maxQty: 10,
+                                                selection: 1
                                             },
                                             {
                                                 id: 1,
@@ -83,6 +82,7 @@ describe('TinkoffService', () => {
                                                 },
                                                 targetPrice: 100,
                                                 maxQty: 10,
+                                                selection: 1
                                             },
                                         ]
                                     }
@@ -161,6 +161,7 @@ describe('TinkoffService', () => {
                 },
                 targetPrice: 100,
                 maxQty: 10,
+                selection: 1
             },
         })
         expect(executeFn).toHaveBeenCalledTimes(4);
@@ -184,6 +185,7 @@ describe('TinkoffService', () => {
 
                 targetPrice: 100,
                 maxQty: 10,
+                selection: 1
             }
         })
 

@@ -1,5 +1,6 @@
 import {DoActionDecision} from "@markets/decision-maker";
 import {ISelectionItem} from "@shared/selection/selection-item.interface";
+import {CatalogItem} from "../../../apps/bot/src/features/catalog/entities/catalog-item.entity";
 
 export type ObserveParams = {
     strategyId: number
@@ -20,4 +21,6 @@ export interface IMarketService {
     stopObserve(params: StopObserveParams);
 
     applyDecision(params: ApplyDecisionParams);
+
+    loadItems(): AsyncGenerator<CatalogItem>;
 }

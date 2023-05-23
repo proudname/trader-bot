@@ -7,23 +7,31 @@ import {UpdateStrategyDto} from "./dto/update-strategy.dto";
 import {Cache} from "cache-manager";
 import {getStrategyCacheKey} from "@shared/utils/cache";
 import {StrategyStatus} from "@shared/enums";
+import {InjectQueue} from "@nestjs/bull";
+import {Queue} from "bull";
+import {StrategyUpdateJobPayload} from "@markets/strategy-update.processor";
 
 @Injectable()
 export class StrategyService extends TypeOrmCrudService<TradingStrategy> {
     constructor(
         @InjectRepository(TradingStrategy) repo: Repository<TradingStrategy>,
         @Inject('CACHE_MANAGER') private cacheManager: Cache,
+        @InjectQueue('strategy-update') private strategyUpdateQueue: Queue<StrategyUpdateJobPayload>
     ) {
         super(repo);
     }
 
     async handleStrategyUpdate(id: number, dto: UpdateStrategyDto): Promise<void> {
+        const jobPayload: StrategyUpdateJobPayload = {strategyId: id};
         if ([dto.status, dto.rules, dto.items].some((item) => item !== undefined)) {
-            await this.cacheManager.del(getStrategyCacheKey(id));
+            const strategy = await this.repo.findOneBy({id});
+            if (!strategy) throw new Error(`Strategy with id ${id} not exists`);
+            jobPayload.switchParams = {market: strategy.market, status: strategy.status};
         }
+        await this.strategyUpdateQueue.add(jobPayload);
     }
 
-    async loadStrategy(strategyId: number): Promise<TradingStrategy> {
+    async loadStrategyForObserve(strategyId: number): Promise<TradingStrategy> {
         const cacheKey = getStrategyCacheKey(strategyId);
         const cachedStrategy = await this.cacheManager.get<TradingStrategy>(cacheKey);
 
@@ -37,7 +45,7 @@ export class StrategyService extends TypeOrmCrudService<TradingStrategy> {
             relations: ['rules', 'items', 'items.items', 'items.items.catalogItem'],
         });
 
-        if (!strategy) throw new Error(`Strategy with id ${strategy.id} disabled or not exists`);
+        if (!strategy) throw new Error(`Strategy with id ${strategyId} disabled or not exists`);
 
         this.cacheManager.set(cacheKey, strategy, 60_000);
 

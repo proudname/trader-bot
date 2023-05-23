@@ -1,7 +1,7 @@
-import OpenAPI, {CandleStreaming, FIGI, LimitOrderRequest, PlacedLimitOrder} from '@tinkoff/invest-openapi-js-sdk';
+import {CandleStreaming, FIGI, LimitOrderRequest, PlacedLimitOrder} from '@tinkoff/invest-openapi-js-sdk';
 import {Injectable, Logger} from "@nestjs/common";
 import {ApplyDecisionParams, IMarketService, ObserveParams, StopObserveParams} from "@markets/market-service.interface";
-import {Observable, Subscription, throwError, timeoutWith} from "rxjs";
+import {Observable, Subscription} from "rxjs";
 import {TinkoffInstrumentInfoMessage} from "@markets/tinkoff/types";
 import {DoActionDecision} from "@markets/decision-maker";
 import {DecideEnum} from "@shared/enums";
@@ -11,11 +11,14 @@ import _ from "lodash";
 import {ISelection} from "@shared/selection/selection.interface";
 import {ISelectionItem} from "@shared/selection/selection-item.interface";
 import {SelectionItem} from "../../../../apps/bot/src/features/selection/entities/selection-item.entity";
-import {MarketsService} from "@markets";
+import {MarketsService} from "../markets.service";
 import {MarketKey} from "@markets/enums";
 import {ObservablePrice, ObservablesService} from "@markets/observables.service";
 import {CatalogItem} from "../../../../apps/bot/src/features/catalog/entities/catalog-item.entity";
 import {StrategyService} from "../../../../apps/bot/src/features/strategy/strategy.service";
+import {MarketInstrumentList} from "@tinkoff/invest-openapi-js-sdk/build/domain";
+
+const OpenAPI = require('@tinkoff/invest-openapi-js-sdk');
 
 type TinkoffItemMeta = { code: string, figi: string };
 
@@ -30,11 +33,12 @@ type HandlePriceChangeParams = {
 export class TinkoffService implements IMarketService {
 
     logger = new Logger(TinkoffService.name);
-    public api: OpenAPI = new OpenAPI({
-        socketURL: process.env.TIN_SOCKET_KEY,
+    public api: typeof OpenAPI = new OpenAPI({
+        socketURL: process.env.TINKOFF_SOCKET_KEY,
         apiURL: process.env.TINKOFF_API_URL,
         secretToken: process.env.TINKOFF_KEY
     });
+
 
     private subscriptions: Map<number, Map<string, Subscription>> = new Map<number, Map<string, Subscription>>();
 
@@ -44,10 +48,13 @@ export class TinkoffService implements IMarketService {
         private strategyService: StrategyService,
     ) {
         marketsService.register(MarketKey.TINKOFF, this);
+        this.api.onStreamingError(({error}) => {
+            console.log(error)
+        });
     }
 
     async observe(params: ObserveParams): Promise<void> {
-        const strategy = await this.strategyService.loadStrategy(params.strategyId);
+        const strategy = await this.strategyService.loadStrategyForObserve(params.strategyId);
         for (const selection of strategy.items as ISelection[]) {
             for (const item of selection.items as ISelectionItem[]) {
 
@@ -55,8 +62,15 @@ export class TinkoffService implements IMarketService {
 
                 let observer = this.observablesService.get(catalogItem.meta.code);
                 if (!observer) {
+                    try {
+                        await this.validateFigi(catalogItem.meta.figi);
+                    } catch (e) {
+                        console.log(e);
+                        return;
+                    }
                     observer = this.observePrice(catalogItem.meta.figi);
                     this.observablesService.set(catalogItem.meta.code, observer)
+
                 }
 
                 const subscription = observer.subscribe((output) => {
@@ -79,13 +93,14 @@ export class TinkoffService implements IMarketService {
                 this.subscriptions.set(params.strategyId, strategySubscriptions)
             }
         }
+        console.log('observer started')
     };
 
     async handlePriceChange(params: HandlePriceChangeParams) {
         const {averagePrice, targetPrice, strategyId, item} = params;
 
         // reload strategy from db
-        const strategy = await this.strategyService.loadStrategy(strategyId);
+        const strategy = await this.strategyService.loadStrategyForObserve(strategyId);
 
         strategy.rules.map((rule: ITradingStrategyRule) => {
             return this.marketsService.executeOrder({
@@ -99,36 +114,22 @@ export class TinkoffService implements IMarketService {
     }
 
 
-    validateFigi(figi: string): Observable<void> {
-        const observable = new Observable<void>((subscriber) => {
+    validateFigi(figi: string): Promise<void> {
+        return new Promise((resolve, reject) => {
             this.api.instrumentInfo({figi}, (message: TinkoffInstrumentInfoMessage) => {
                 if (message.trade_status === 'normal_trading') {
-                    subscriber.complete();
+                    resolve();
                 }
-                subscriber.error(
-                    new Error(`Ticker can\'t be observed: trade status is ${message.trade_status}`)
-                )
+                reject(`Ticker can\'t be observed: trade status is ${message.trade_status}`);
             })
-        });
 
-        return observable.pipe(
-            timeoutWith(
-                5000,
-                throwError(() => new Error(`Ticker can\'t be observed: timeout has reached`))
-            )
-        )
+            setTimeout(() => reject('Ticker can\'t be observed: timeout'), 7000);
+        });
     }
 
 
     observePrice(figi: string): ObservablePrice {
         return new Observable((subscriber) => {
-
-            this.validateFigi(figi)
-                .subscribe({
-                    error: (err) => {
-                        subscriber.error(err)
-                    }
-                });
 
             const unsubscribeFn = this.api.candle({
                 figi,
@@ -158,6 +159,7 @@ export class TinkoffService implements IMarketService {
             }
             this.subscriptions.delete(params.strategyId);
         }
+        console.log('observer started')
     }
 
 
@@ -198,4 +200,24 @@ export class TinkoffService implements IMarketService {
     getSubscriptions(): Map<number, Map<string, Subscription>> {
         return this.subscriptions;
     }
+
+    async* loadItems(): AsyncGenerator<CatalogItem> {
+
+        const stocks: MarketInstrumentList = await this.api.stocks();
+
+        console.log('Total Tinkoff stocks', stocks.total)
+
+        for (const stock of stocks.instruments) {
+            const catalogItem = new CatalogItem();
+            catalogItem.title = stock.name;
+            catalogItem.markets = [MarketKey.TINKOFF];
+            catalogItem.meta = {
+                figi: stock.figi,
+                code: stock.ticker,
+                currency: stock.currency
+            }
+            yield catalogItem;
+        }
+    }
+
 }

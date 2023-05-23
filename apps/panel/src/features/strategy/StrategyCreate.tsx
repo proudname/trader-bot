@@ -1,17 +1,19 @@
 import * as React from 'react';
 import {
     ArrayInput,
-    AutocompleteArrayInput,
     Create,
+    FunctionField,
     NumberInput,
-    ReferenceArrayInput,
     required,
     SelectInput,
     SimpleForm,
     SimpleFormIterator,
+    TextField,
     TextInput
 } from 'react-admin';
 import {StrategyStatus, TradeAction, TradingRuleStatus} from '@shared/enums';
+import {MarketKey} from "../../../../../libs/markets/src/enums";
+import {ReferenceManyField} from "../../fields/ReferenceManyField";
 
 export const StrategyCreate = () => {
     return <Create transform={(data: any) => ({
@@ -20,17 +22,21 @@ export const StrategyCreate = () => {
     })}>
         <SimpleForm>
             <TextInput source="name" validate={[required()]} fullWidth/>
-            <ReferenceArrayInput
-                source="items"
-                reference="selection"
-            >
-                <AutocompleteArrayInput
-                    optionText={value => value.name + ' #' + value.id}
-                />
-            </ReferenceArrayInput>
+            <SelectInput validate={[required()]} defaultValue={MarketKey.TINKOFF} source="market"
+                         choices={[
+                             {id: MarketKey.TINKOFF, name: 'TINKOFF'},
+                             {id: MarketKey.BINANCE, name: 'BINANCE'},
+                         ]}/>
+            <ReferenceManyField source={'items'} resource={'selection'} title={'Selections'} searchField={'name'}>
+                <TextField source="id"/>
+                <TextField source="name"/>
+                <FunctionField label="Total items" render={(record: any) => `${record.items.length}`}/>
+            </ReferenceManyField>
             <ArrayInput source="rules">
                 <SimpleFormIterator inline>
                     <NumberInput validate={[required()]} source="change" helperText={false}/>
+                    <NumberInput validate={[required()]} source="qty" helperText={false}/>
+                    <NumberInput source="used" helperText={false} disabled defaultValue={0}/>
                     <SelectInput defaultValue={TradingRuleStatus.ACTIVE} disabled source="status" choices={[
                         {id: TradingRuleStatus.ACTIVE, name: 'Active'},
                         {id: TradingRuleStatus.EXECUTED, name: 'Executed'},

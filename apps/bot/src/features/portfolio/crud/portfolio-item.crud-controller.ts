@@ -12,6 +12,13 @@ import {UpdatePortfolioItemDto} from "../dto/update-portfolio-item.dto";
         type: PortfolioItem
     },
     routes: {},
+    query: {
+        join: {
+            catalogItem: {
+                eager: true,
+            }
+        }
+    },
     dto: {
         create: CreatePortfolioItemDto,
         update: UpdatePortfolioItemDto

@@ -1,4 +1,4 @@
-import {Column, Entity, JoinTable, ManyToMany} from "typeorm";
+import {Column, Entity, JoinColumn, OneToMany} from "typeorm";
 import {SelectionItem} from "./selection-item.entity";
 import {MarketKey} from "@markets/enums";
 import {ISelection} from "@shared/selection/selection.interface";
@@ -16,7 +16,7 @@ export class Selection extends BaseEntity implements ISelection {
     })
     market: MarketKey;
 
-    @ManyToMany(() => SelectionItem)
-    @JoinTable()
+    @OneToMany(() => SelectionItem, (selectionItem) => selectionItem.selection, {cascade: true})
+    @JoinColumn()
     items: SelectionItem[]
 }

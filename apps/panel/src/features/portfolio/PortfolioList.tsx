@@ -1,4 +1,4 @@
-import {CreateButton, Datagrid, List, ListProps, TextField, TopToolbar,} from 'react-admin';
+import {CreateButton, Datagrid, FunctionField, List, ListProps, TextField, TopToolbar,} from 'react-admin';
 
 
 const ListActions = () => (
@@ -11,7 +11,7 @@ export const PortfolioList = (props: ListProps) => (
     <List actions={<ListActions/>} {...props}>
         <Datagrid rowClick={'edit'}>
             <TextField source="id"/>
-            <TextField source="title"/>
+            <FunctionField source="catalogItem" render={(record: any) => record.catalogItem.title}/>
             <TextField source="market"/>
             <TextField source="qty"/>
         </Datagrid>

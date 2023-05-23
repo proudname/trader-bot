@@ -32,11 +32,13 @@ export class TradingStrategy extends BaseEntity implements ITradingStrategy {
     @JoinTable()
     items: DBRelation<Selection>[];
 
-    @OneToMany(() => TradingStrategyRule, rule => rule.strategy, {cascade: true})
+    @OneToMany(() => TradingStrategyRule, rule => rule.strategy, {
+        cascade: true,
+    })
     @JoinColumn()
     rules: DBRelation<ITradingStrategyRule>[];
 
-    @Column({type: 'varchar', enum: StrategyStatus, default: StrategyStatus.ENABLED})
+    @Column({type: 'varchar', enum: StrategyStatus, default: StrategyStatus.DISABLED})
     status: StrategyStatus;
 
     @CreateDateColumn()

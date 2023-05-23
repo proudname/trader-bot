@@ -1,29 +1,46 @@
 import * as React from 'react';
 import {
-    SimpleForm,
-    TextInput,
-    required,
+    ArrayInput,
     Edit,
-    ReferenceArrayInput,
-    AutocompleteArrayInput
+    minValue,
+    NumberInput,
+    required,
+    SelectInput,
+    SimpleForm,
+    SimpleFormIterator,
+    TextField,
+    TextInput
 } from 'react-admin';
+import {MarketKey} from "../../../../../../libs/markets/src/enums";
+import {ReferenceOneField} from "../../../fields/ReferenceOneField";
 
 export const SelectionEdit = () => {
 
-    return <Edit transform={(data) => ({
-        ...data,
-        items: data.items.map((item: any) => ({id: item}))
-    })}>
+    return <Edit>
         <SimpleForm>
             <TextInput source="name" validate={[required()]} fullWidth/>
-            <ReferenceArrayInput
-                source="items"
-                reference="selection-item"
-            >
-                <AutocompleteArrayInput
-                    optionText={value => value.title + ' #' + value.id}
-                />
-            </ReferenceArrayInput>
+
+            <SelectInput validate={[required()]} defaultValue={MarketKey.TINKOFF} source="market"
+                         choices={[
+                             {id: MarketKey.TINKOFF, name: 'TINKOFF'},
+                             {id: MarketKey.BINANCE, name: 'BINANCE'},
+                         ]}/>
+
+
+            <ArrayInput source="items">
+                <SimpleFormIterator inline>
+
+                    <ReferenceOneField source={'catalogItem'} resource={'catalog-item'} searchField={'title'}
+                                       title={'Catalog item'}>
+                        <TextField source="id"/>
+                        <TextField source="title"/>
+                    </ReferenceOneField>
+
+                    <NumberInput source="targetPrice" validate={[required()]}/>
+                    <NumberInput source="maxQty" min={0} validate={[required(), minValue(0)]} label="Maximum quantity"/>
+
+                </SimpleFormIterator>
+            </ArrayInput>
         </SimpleForm>
     </Edit>
 };

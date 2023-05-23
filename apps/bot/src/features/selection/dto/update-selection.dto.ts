@@ -7,5 +7,5 @@ export class UpdateSelectionDto {
 
     @IsArray()
     @IsOptional()
-    items: number[]
+    items: any[]
 }

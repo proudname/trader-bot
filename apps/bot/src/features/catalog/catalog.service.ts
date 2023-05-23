@@ -7,7 +7,6 @@ export class CatalogService {
     constructor(
         @InjectQueue('catalog') private catalogQueue: Queue
     ) {
-        console.log('add')
         catalogQueue.add({}, {
             repeat: {
                 cron: '0 0 * * *'

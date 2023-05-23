@@ -18,6 +18,8 @@ export const HistoryShow = () => (
                     - Action: <FunctionField render={(record: any) => traderActionMapper(Number(record.action))}/>
                 </div>
             </ReferenceField>
+            <NumberField source={'qty'}/>
+            <TextField source={'result'}/>
             <DateField source="createdAt"/>
         </SimpleShowLayout>
     </Show>

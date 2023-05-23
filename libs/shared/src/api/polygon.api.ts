@@ -15,7 +15,7 @@ class PolygonApi {
         try {
             const {
                 data,
-            } = await this.httpService.axiosRef.get<PolygonTickersResponse>(`${this.baseUrl}/v3/reference/tickers`, {
+            } = await this.httpService.axiosRef.get<PolygonTickersResponse>(`${this.baseUrl}/v3/reference/tickers?sort=locale`, {
                 params: query
             });
             if (!data || data.status !== 'OK') {

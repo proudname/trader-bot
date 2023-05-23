@@ -14,13 +14,15 @@ export class TradingStrategyRule extends BaseEntity implements ITradingStrategyR
     @Column({type: 'int'})
     qty: number;
 
-    @Column({type: 'int'})
+    @Column({type: 'int', default: 0})
     used: number;
 
     @Column({type: 'varchar', default: TradingRuleStatus.ACTIVE, enum: TradingRuleStatus})
     status: TradingRuleStatus;
 
-    @ManyToOne(() => TradingStrategy, strategy => strategy.rules)
+    @ManyToOne(() => TradingStrategy, strategy => strategy.rules, {
+        onDelete: 'CASCADE',
+    })
     strategy: DBRelation<TradingStrategy>;
 
     @Column({type: 'varchar', enum: TradeAction})

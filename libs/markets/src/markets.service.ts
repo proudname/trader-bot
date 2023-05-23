@@ -38,8 +38,8 @@ export class MarketsService {
         this.markets.set(key, service);
     }
 
-    get(key: MarketKey) {
-        this.markets.get(key);
+    get(key: MarketKey): IMarketService {
+        return this.markets.get(key);
     }
 
     async executeOrder({rule, targetPrice, averagePrice, item, market}: ExecuteOrderParams) {
@@ -71,7 +71,7 @@ export class MarketsService {
 
             const {orderId, executedLots} = await service.applyDecision({decision, item});
 
-            actualRule.qty += executedLots;
+            actualRule.used += executedLots;
             await queryRunner.manager.save(actualRule);
 
             let actualPortfolioItem = await queryRunner.manager.findOneBy<PortfolioItem>(PortfolioItem, {
@@ -115,7 +115,7 @@ export class MarketsService {
 
     async initializeObservers() {
         for await (const strategy of this.strategyService.getStrategiesToObserve()) {
-            const service = this.markets.get(strategy.market);
+            const service = this.markets.get(Number(strategy.market));
             await service.observe({strategyId: strategy.id});
         }
     }
